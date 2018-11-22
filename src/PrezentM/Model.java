@@ -16,6 +16,23 @@ public class Model {
 	public static Object blokada=new Object();
 	public static boolean prezentacja=false;
 	
+	public static class Krawedz
+	{
+		public CzytaczXML.Punkt polozenie;
+		public int typ;
+		public double dlugosc;
+		public final static int DOL=2;
+		public final static int LEWO=4;
+		public final static int PRAWO=6;
+		public final static int GORA=8;
+		
+		public Krawedz(CzytaczXML.Punkt para, int t, double dlug)
+		{
+			this.polozenie=para;
+			this.typ=t;
+			this.dlugosc=dlug;
+		}
+	}
 	public static void przesunMapeMysza(double X, double Y) {
 		xMyszy=X;
 		yMyszy=Y;
@@ -105,24 +122,6 @@ public class Model {
 			Widok.mapa.setTranslateY(Widok.mapa.getTranslateY()-predkosc);
 	}
 	
-	public static class Krawedz
-	{
-		public Pair<Double,Double> polozenie;
-		public int typ;
-		public double dlugosc;
-		public final static int DOL=2;
-		public final static int LEWO=4;
-		public final static int PRAWO=6;
-		public final static int GORA=8;
-		
-		public Krawedz(Pair<Double,Double> para, int t, double dlug)
-		{
-			this.polozenie=para;
-			this.typ=t;
-			this.dlugosc=dlug;
-		}
-	}
-	
 	private static boolean mozna(int kierunek) {
 		// TODO Auto-generated method stub
 		double polozenieX=Widok.mapa.getTranslateX()*(-1);
@@ -131,45 +130,7 @@ public class Model {
 		double wysEkranu=Screen.getPrimary().getVisualBounds().getHeight();//TODO wiele monitorów
 		boolean zwrot=true;
 		
-		
-		int ilePunktow=Widok.ksztaltMapy.size();//TODO przenies do ustalKsztaltMapy
-		ArrayList<Krawedz> listaKrawedzi=new ArrayList<Krawedz>(ilePunktow);
-		Iterator<Pair<Double,Double>> it=Widok.ksztaltMapy.iterator();
-		Pair<Double,Double> poprzedni=it.next();
-		while(it.hasNext())
-		{
-			Pair<Double,Double> obecny=it.next();
-			double x2=obecny.getKey();
-			double y2=obecny.getValue();
-			double x1=poprzedni.getKey();
-			double y1=poprzedni.getValue();
-			int typKrawedzi;
-			double dlugosc=x2-x1;
-			if(dlugosc==0)
-			{
-				dlugosc=y2-y1;
-				if (dlugosc>0)
-				{
-					typKrawedzi=Krawedz.LEWO;
-				}
-				else
-				{
-					typKrawedzi=Krawedz.PRAWO;					
-				}
-			}
-			else if (dlugosc>0)
-			{
-				typKrawedzi=Krawedz.DOL;
-			}
-			else
-			{
-				typKrawedzi=Krawedz.GORA;
-			}
-			listaKrawedzi.add(new Krawedz(poprzedni,typKrawedzi,Math.abs(dlugosc)));
-			poprzedni=obecny;
-		}
-		listaKrawedzi.add(new Krawedz(poprzedni,Krawedz.GORA,Math.abs(listaKrawedzi.get(0).polozenie.getKey()-
-				poprzedni.getKey())));
+		ArrayList<Krawedz> listaKrawedzi=Widok.ksztaltMapy;
 		
 		
 
@@ -183,8 +144,8 @@ public class Model {
 					Krawedz k=iter.next();
 					if(k.typ==kierunek)
 					{
-						double xWektora=polozenieX-k.polozenie.getKey();
-						double yWektora=polozenieY-k.polozenie.getValue();
+						double xWektora=polozenieX-k.polozenie.getX();
+						double yWektora=polozenieY-k.polozenie.getY();
 						if(xWektora<=0)
 							if((yWektora+wysEkranu>0&&yWektora+wysEkranu<k.dlugosc)||
 									(yWektora>0&&yWektora<k.dlugosc))
@@ -199,8 +160,8 @@ public class Model {
 					Krawedz k=iter.next();
 					if(k.typ==kierunek)
 					{
-						double xWektora=polozenieX-k.polozenie.getKey();
-						double yWektora=polozenieY+wysEkranu-k.polozenie.getValue();
+						double xWektora=polozenieX-k.polozenie.getX();
+						double yWektora=polozenieY+wysEkranu-k.polozenie.getY();
 						if(yWektora>=0)
 							if((xWektora<k.dlugosc&&xWektora>0)||
 									(xWektora+szerEkranu>0&&xWektora+szerEkranu<k.dlugosc))
@@ -215,8 +176,8 @@ public class Model {
 					Krawedz k=iter.next();
 					if(k.typ==kierunek)
 					{
-						double xWektora=polozenieX+szerEkranu-k.polozenie.getKey();
-						double yWektora=polozenieY+wysEkranu-k.polozenie.getValue();
+						double xWektora=polozenieX+szerEkranu-k.polozenie.getX();
+						double yWektora=polozenieY+wysEkranu-k.polozenie.getY();
 						if(xWektora>=0)
 							if((yWektora-wysEkranu<0&&yWektora-wysEkranu>k.dlugosc*(-1))||
 									(yWektora<0&&yWektora>k.dlugosc*(-1)))
@@ -231,8 +192,8 @@ public class Model {
 					Krawedz k=iter.next();
 					if(k.typ==kierunek)
 					{
-						double xWektora=polozenieX+szerEkranu-k.polozenie.getKey();
-						double yWektora=polozenieY-k.polozenie.getValue();
+						double xWektora=polozenieX+szerEkranu-k.polozenie.getX();
+						double yWektora=polozenieY-k.polozenie.getY();
 						if(yWektora<=0)
 							if((xWektora>k.dlugosc*(-1)&&xWektora<0)||
 									(xWektora-szerEkranu<0&&xWektora-szerEkranu>k.dlugosc*(-1)))

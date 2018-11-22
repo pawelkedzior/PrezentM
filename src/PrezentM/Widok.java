@@ -1,10 +1,12 @@
 package PrezentM;
 	
-import java.util.LinkedList;
+import java.util.ArrayList;
 
+import javax.xml.bind.JAXBException;
+
+import PrezentM.Model.Krawedz;
 import javafx.application.Application;
 import javafx.stage.Stage;
-import javafx.util.Pair;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -14,9 +16,9 @@ import javafx.scene.layout.BorderPane;
 public class Widok extends Application {
 	int stan=0;
 	public static ImageView mapa;
-	private Image Kob;
-	private Image Kar;
-	public static LinkedList<Pair<Double,Double>> ksztaltMapy;
+	private static Image Kob;
+	private static Image Kar;
+	public static ArrayList<Krawedz> ksztaltMapy;
 	
 	@Override
 	public void start(Stage primaryStage) {
@@ -26,10 +28,7 @@ public class Widok extends Application {
 			scene.getStylesheets().add(getClass().getResource("OknoGlowne.css").toExternalForm());
 			primaryStage.setFullScreen(true);
 			//Iterator<Screen> it=Screen.getScreens().listIterator();
-			Kob=new Image(getClass().getResourceAsStream("pryw/Mapy/Kob.png"));
-			mapa=new ImageView(Kob);
-			Kar=new Image(getClass().getResourceAsStream("pryw/Mapy/Kar 3828x4395.png"));
-			root.setTop(mapa);
+			zaladujMapy();
 			primaryStage.setScene(scene);
 			scene.setOnMouseMoved((wyd)->{
 				Model.przesunMapeMysza(wyd.getX(),wyd.getY());
@@ -42,27 +41,37 @@ public class Widok extends Application {
 			});*/
 			scene.setOnMouseEntered((wyd)->{Model.kursorPoza=false;});
 			scene.setOnMouseExited((wyd)->{Model.kursorPoza=true;});
+			wczytajMape(scene,"Kar");
+			root.setTop(mapa);
 			primaryStage.show();
-			ustalKsztaltMapy(scene);
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
-	private static void ustalKsztaltMapy(Scene scena)
+	private void zaladujMapy()
 	{
-		//TODO XML
-		double wys=scena.getWindow().getHeight();
-		double szer=scena.getWindow().getWidth();
-		ksztaltMapy=new LinkedList<Pair<Double,Double>>();
-		Pair<Double,Double> punkt=new Pair<Double,Double>(0.0,0.0);
-		ksztaltMapy.add(punkt);
-		punkt=new Pair<Double,Double>(0.0,wys-1);
-		ksztaltMapy.add(punkt);
-		punkt=new Pair<Double,Double>(szer-1,wys-1);
-		ksztaltMapy.add(punkt);
-		punkt=new Pair<Double,Double>(szer-1,0.0);
-		ksztaltMapy.add(punkt);
+		Kob=new Image(getClass().getResourceAsStream("pryw/Mapy/Kob.png"));
+		Kar=new Image(getClass().getResourceAsStream("pryw/Mapy/Kar.png"));		
+	}
+	
+	private static void wczytajMape(Scene scena, String jakaMapa) throws JAXBException
+	{
+		ustalKsztaltMapy(scena, "bin/PrezentM/pryw/Mapy/"+jakaMapa+".xml");	
+		switch(jakaMapa)
+		{
+			case "Kob":
+				mapa=new ImageView(Kob);
+			break;
+			case "Kar":
+				mapa=new ImageView(Kar);
+			break;
+		}
+	}
+	
+	private static void ustalKsztaltMapy(Scene scena, String sciezkaMapy) throws JAXBException
+	{
+		ksztaltMapy=CzytaczXML.przeczytajWierzcholki(sciezkaMapy);
 	}
 	
 	public static void wczytajMape(String sciezka)
